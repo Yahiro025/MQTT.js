@@ -126,4 +126,24 @@ describe('streamErrorHandler', () => {
 			),
 		)
 	})
+
+	it('should keep generic WebSocket errors silent', function _test(t, done) {
+		const stream = createStream()
+		const client = new mqtt.MqttClient(() => stream, {
+			manualConnect: true,
+			reconnectPeriod: 0,
+		})
+		let errorEvents = 0
+
+		client.on('error', () => {
+			errorEvents += 1
+		})
+		client.once('close', () => {
+			assert.strictEqual(errorEvents, 0)
+			client.end(true, (endError) => done(endError))
+		})
+
+		client.connect()
+		stream.destroy(new Error('WebSocket error'))
+	})
 })

@@ -63,11 +63,16 @@ const RECEIVE_MAXIMUM_EXCEEDED = 147
 
 const WS_CLOSED_BEFORE_OPEN =
 	'WebSocket was closed before the connection was established'
+const WS_ERROR = 'WebSocket error'
 
 function isMeaningfulStreamError(
 	error?: Error & { code?: string | number },
 ): error is Error & { code?: string | number } {
-	return Boolean(error?.message && error.message !== WS_CLOSED_BEFORE_OPEN)
+	return Boolean(
+		error?.message &&
+		error.message !== WS_CLOSED_BEFORE_OPEN &&
+		error.message !== WS_ERROR,
+	)
 }
 
 const defaultConnectOptions: IClientOptions = {
