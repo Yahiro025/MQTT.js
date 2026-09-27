@@ -42,13 +42,20 @@ describe('streamErrorHandler', () => {
 			reconnectPeriod: 0,
 			connectTimeout: 1000,
 		})
+		const errors: Error[] = []
 
-		client.once('error', (error) => {
-			assert.strictEqual(
-				error.message,
-				'Username is required to use password',
-			)
-			client.end(true, (endError) => done(endError))
+		client.on('error', (error) => {
+			errors.push(error)
+			if (errors.length === 1) {
+				setImmediate(() => {
+					assert.strictEqual(errors.length, 1)
+					assert.strictEqual(
+						errors[0].message,
+						'Username is required to use password',
+					)
+					client.end(true, (endError) => done(endError))
+				})
+			}
 		})
 	})
 

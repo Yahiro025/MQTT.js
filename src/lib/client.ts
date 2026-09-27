@@ -1046,11 +1046,12 @@ export default class MqttClient extends TypedEventEmitter<MqttClientEventCallbac
 		)
 		this.stream = this.streamBuilder(this)
 
+		const stream = this.stream
 		let forwardedDestroyError: Error | undefined
-		const destroy = this.stream.destroy.bind(this.stream)
-		this.stream.destroy = ((error?: Error, callback?) => {
+		const destroy = stream.destroy.bind(stream)
+		stream.destroy = ((error?: Error, callback?) => {
 			if (
-				!this.stream.destroyed &&
+				!stream.destroyed &&
 				isMeaningfulStreamError(error) &&
 				!error.code
 			) {
@@ -1058,7 +1059,7 @@ export default class MqttClient extends TypedEventEmitter<MqttClientEventCallbac
 				nextTick(() => this.emit('error', error))
 			}
 			return destroy(error, callback)
-		}) as typeof this.stream.destroy
+		}) as typeof stream.destroy
 
 		parser.on('packet', (packet) => {
 			this.log('parser :: on packet push to packets array.')
