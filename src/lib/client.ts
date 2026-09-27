@@ -66,7 +66,7 @@ const WS_CLOSED_BEFORE_OPEN =
 
 function isMeaningfulStreamError(
 	error?: Error & { code?: string | number },
-): error is Error {
+): error is Error & { code?: string | number } {
 	return Boolean(error?.message && error.message !== WS_CLOSED_BEFORE_OPEN)
 }
 
@@ -1049,7 +1049,11 @@ export default class MqttClient extends TypedEventEmitter<MqttClientEventCallbac
 		let forwardedDestroyError: Error | undefined
 		const destroy = this.stream.destroy.bind(this.stream)
 		this.stream.destroy = ((error?: Error, callback?) => {
-			if (isMeaningfulStreamError(error) && !error.code) {
+			if (
+				!this.stream.destroyed &&
+				isMeaningfulStreamError(error) &&
+				!error.code
+			) {
 				forwardedDestroyError = error
 				nextTick(() => this.emit('error', error))
 			}

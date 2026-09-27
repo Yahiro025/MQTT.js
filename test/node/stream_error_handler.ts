@@ -52,6 +52,30 @@ describe('streamErrorHandler', () => {
 		})
 	})
 
+	it('should emit packet write errors once on TLS streams', function _test(t, done) {
+		const client = mqtt.connect({
+			protocol: 'mqtts',
+			host: '127.0.0.1',
+			port: 1,
+			password: 'secret',
+			reconnectPeriod: 0,
+			connectTimeout: 1000,
+		})
+		const errors: Error[] = []
+
+		client.on('error', (error) => {
+			errors.push(error)
+		})
+		client.once('close', () => {
+			assert.strictEqual(errors.length, 1)
+			assert.strictEqual(
+				errors[0].message,
+				'Username is required to use password',
+			)
+			client.end(true, (endError) => done(endError))
+		})
+	})
+
 	it('should keep silent stream destruction silent', function _test(t, done) {
 		const stream = createStream()
 		const client = new mqtt.MqttClient(() => stream, {
